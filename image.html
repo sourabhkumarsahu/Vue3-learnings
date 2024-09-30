@@ -1,0 +1,86 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <style >
+        .photos {
+            display: flex;
+            flex-wrap: wrap;
+            align-items: center;
+            justify-content: center;
+            width: 100%;
+        }
+
+        .photo {
+            flex: 0 0 25%;
+            position: relative;
+        }
+        .photo figure img {
+            position: absolute;
+            height: 300px;
+        }
+    </style>
+    <script src="https://unpkg.com/vue@3.4.0"></script>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Document</title>
+</head>
+<body>
+<div id="app">
+    <div>
+        <form @submit.prevent="addPhoto">
+            <input v-model="newPhotoURL" placeholder="Enter your image URL" type="text"/>
+            <button type="submit">Add Photo</button>
+        </form>
+    </div>
+    <div class="gallery">
+        <div v-if="photos.length === 0" class="no-photo">
+            There are no photos added right now
+        </div>
+        <div v-else class="photos">
+            <div class="photo" v-for="photo in photos" :key="photo.id">
+                <figure>
+                    <img alt="photo.url" :src="photo.url">
+                </figure>
+                <button @click="addFav(photo.id)" :class="{'light': photo.isFav, 'favorite-button': true}">
+                    ★
+                </button>
+            </div>
+        </div>
+    </div>
+
+</div>
+<script>
+    const {createApp, ref} = Vue;
+    let App = {
+        setup() {
+            const photos = ref([]);
+            const newPhotoURL = ref('');
+            const addPhoto = () => {
+                const photo = {
+                    id: photos.value.length + 1,
+                    url: newPhotoURL.value,
+                    isFav: false
+                }
+                if(newPhotoURL.value.length !== 0) {
+                    photos.value.push(photo);
+                    newPhotoURL.value = '';
+                }
+
+            }
+            const addFav = (id) => {
+                console.log(photos)
+                photos.value.forEach( x => {
+                    if(x.id === id){
+                        x.isFav = !x.isFav;
+                    }
+                } )
+            }
+            return {
+                addPhoto, photos, newPhotoURL, addFav
+            };
+        }
+    }
+    createApp(App).mount('#app');
+</script>
+</body>
+</html>

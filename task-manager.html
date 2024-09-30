@@ -1,0 +1,91 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <style type="text/css">
+        .high {
+            color: red;
+        }
+
+        .medium {
+            color: yellow;
+        }
+
+        .low {
+            color: green;
+        }
+    </style>
+    <script src="https://unpkg.com/vue@3.4.0"></script>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Document</title>
+</head>
+<body>
+<div id="app">
+    <div class="todo-header">
+        <div>
+            <form @submit.prevent="addTask">
+                <input ref="newTask" placeholder="Add New Task" v-model="newTaskInput">
+                <select v-model="newPriority">
+                    <option disabled value="">Select Priority</option>
+                    <option value="High">High</option>
+                    <option value="Medium">Medium</option>
+                    <option value="Low">Low</option>
+                </select>
+                <button type="submit">Add Task</button>
+            </form>
+
+            <input placeholder="Filter task...">
+
+            <div v-if="tasks.length === 0"><p>No task Found</p></div>
+
+            <div v-else>
+                <h3>Your tasks</h3>
+                <div v-for="task in tasks" key="task.id"
+                     :class="{'task':true,'done':task.done ,[task.priority.toLowerCase()]:true }">
+                    <input type="checkbox" v-model="task.done">
+                    <span>{{task.description}}</span>
+                    <button class="remove-button">✖</button>
+                </div>
+
+            </div>
+        </div>
+    </div>
+</div>
+<script>
+    const {createApp, ref, onMounted, watch, watchEffect} = Vue;
+    let App = {
+        setup() {
+            const newTaskInput = ref(null);
+            const newPriority = ref('');
+            const tasks =  ref(JSON.parse(localStorage.getItem('tasks') ?? '[]'))
+            const newTask = ref(null)
+            onMounted(() => {
+                newTask.value.focus();
+            });
+            addTask = () => {
+                if (newTaskInput.value !== '' && newPriority.value !== '') {
+                    tasks.value.push({
+                        id: tasks.value.length + 1,
+                        description: newTaskInput.value,
+                        priority: newPriority.value,
+                        done: false
+                    })
+                    newTaskInput.value = '';
+                    newPriority.value = '';
+                }
+            }
+            watch(tasks, () => {
+               localStorage.setItem('tasks',JSON.stringify(tasks.value))
+            }, {deep: true});
+            watchEffect(()=>{
+                console.log(`new tasks input is ${newTaskInput.value}`)
+            })
+            return {
+                newTask, tasks, newTaskInput, newPriority, addTask
+            }
+        }
+    };
+    createApp(App).mount('#app');
+</script>
+</body>
+</html>
